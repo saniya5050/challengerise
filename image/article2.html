@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindful Eating Habits</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #a8e063, #56ab2f);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-top: 20px;
+            animation: fadeInDown 1s ease-in-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .timer {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+            background: #ff6347;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 15px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        p {
+            font-size: 1.2em;
+            width: 80%;
+            margin: 20px auto;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-in-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .quote {
+            font-size: 1.5em;
+            font-style: italic;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            animation: popUp 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes popUp {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        .tip-box {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .tip {
+            width: 250px;
+            height: 150px;
+            background: white;
+            border-radius: 10px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.5s ease-in-out;
+            cursor: pointer;
+            animation: fadeInUp 1.5s ease-in-out;
+            position: relative;
+        }
+
+        .tip:hover {
+            transform: scale(1.1);
+            background: #ff4500;
+            color: white;
+        }
+
+        .tip::after {
+            content: attr(data-hover);
+            position: absolute;
+            bottom: -40px;
+            font-size: 1em;
+            color: #333;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .tip:hover::after {
+            opacity: 1;
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #ff4500;
+        }
+    </style>
+</head>
+<body>
+    <h1>🍏 Mindful Eating Habits 🍏</h1>
+
+    <div class="timer" id="timer">⏳ 5:00</div>
+
+    <p>
+        Mindful eating means paying full attention to the experience of eating and drinking. It helps in improving digestion, reducing overeating, and enhancing enjoyment of meals.
+    </p>
+
+    <div class="quote">"Eat with intention, not out of habit."</div>
+
+    <p>
+        By slowing down, savoring each bite, and appreciating the flavors, you build a healthy relationship with food. Mindful eating is key to a balanced and nourished life.
+    </p>
+
+    <h2>🥗 3 Tips for Mindful Eating 🥗</h2>
+    <div class="tip-box">
+        <div class="tip" data-hover="Chewing thoroughly aids digestion and helps control portion sizes.">Chew slowly 🍽</div>
+        <div class="tip" data-hover="Eating without screens increases satisfaction and reduces overeating.">Avoid distractions 📵</div>
+        <div class="tip" data-hover="Recognizing fullness cues prevents overeating and promotes balance.">Listen to your body 🧘</div>
+    </div>
+	<br>
+	<br>
+    <p class="glow">✨ Small mindful steps lead to a healthier lifestyle! ✨</p>
+
+    <button class="back-btn" onclick="goBack()">⬅ Back to Challenges</button>
+
+    <script>
+        function goBack() {
+            window.location.href = "d8.html";
+        }
+
+        function startTimer(duration, display) {
+            let timer = duration, minutes, seconds;
+            let interval = setInterval(function () {
+                minutes = Math.floor(timer / 60);
+                seconds = timer % 60;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                display.textContent = `⏳ ${minutes}:${seconds}`;
+
+                if (--timer < 0) {
+                    clearInterval(interval);
+                    display.textContent = "⏳ Time's Up!";
+                    alert("⏳ Your 5 minutes are over! Hope you enjoyed the article.");
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            let timerDisplay = document.getElementById("timer");
+            startTimer(300, timerDisplay);
+        };
+    </script>
+</body>
+</html>
