@@ -1,0 +1,538 @@
+<?php
+session_start();
+include 'connection.php'; // Ensure this file contains a valid database connection
+
+$error_message = "";
+$success_message = "";
+
+// Initialize $email_value to avoid "undefined variable" error
+$email_value = isset($_POST['email']) ? trim($_POST['email']) : "";
+
+// ** REGISTRATION PROCESS ** (Removed bcrypt)
+if (isset($_POST['register'])) {
+    $name = trim($_POST['name']);
+    $contact = trim($_POST['contact']);
+    $dob = $_POST['dob'];
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $confirmPassword = $_POST['confirmPassword'];
+
+    // Validate input
+    if (!preg_match("/^[a-zA-Z ]+$/", $name)) {
+        echo "<script>alert('❌ Invalid name format!');</script>";
+    } elseif (!preg_match("/^[0-9]{10}$/", $contact)) {
+        echo "<script>alert('❌ Invalid contact number!');</script>";
+    } elseif ($password !== $confirmPassword) {
+        echo "<script>alert('❌ Passwords do not match!');</script>";
+    } else {
+        // Store password in plain text (⚠️ NOT SECURE)
+        $query = "INSERT INTO regis (Name, Contact, DOB, Email, Password) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("sssss", $name, $contact, $dob, $email, $password);
+
+        if ($stmt->execute()) {
+            echo "<script>alert('✅ Registration successful!');</script>";
+        } else {
+            echo "<script>alert('❌ Registration failed. Email might already be registered.');</script>";
+        }
+        $stmt->close();
+    }
+}
+
+// ** LOGIN PROCESS ** (Removed bcrypt)
+if (isset($_POST['login'])) {
+    $email_value = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    $query = "SELECT id, Password FROM regis WHERE Email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email_value);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+    if ($user && $password === $user['Password']) {  // Plain text comparison
+        $_SESSION['user_id'] = $user['id'];
+        echo "<script>alert('✅ Login successful!'); window.location='day1.php';</script>";
+    } else {
+        echo "<script>alert('❌ Invalid email or password.');</script>";
+    }
+    $stmt->close();
+}
+
+// ** PASSWORD RESET PROCESS ** (Removed bcrypt)
+if (isset($_POST['reset_password'])) {
+    $email = trim($_POST['reset_username']);
+    $new_password = $_POST['new_password'];
+
+    $query = "UPDATE regis SET Password = ? WHERE Email = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ss", $new_password, $email);  // Storing as plain text
+
+    if ($stmt->execute() && $stmt->affected_rows > 0) {
+        echo "<script>alert('✅ Password has been reset successfully!');</script>";
+    } else {
+        echo "<script>alert('❌ Email not found or no changes made!');</script>";
+    }
+    $stmt->close();
+}
+
+$conn->close();
+?>
+<html>
+<head>
+    <title>Workshop</title>
+<!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Times New Roman", serif;
+        }
+
+        body {
+            background-color: WhiteSmoke;
+            width: 100%;
+            margin: auto;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #618780;
+            padding: 15px;
+        }
+
+        .navbar img {
+            width: 150px;
+            height: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button {
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            font-size: 18px;
+            background-color: #618780;
+            cursor: pointer;
+            border-radius: 20px;
+        }
+
+        .button:hover {
+            background-color: #4b5e5b;
+        }
+
+        a {
+            text-decoration: none;
+            color: white;
+        }
+
+        /* Content Sections */
+        #ex1 {
+            background-color: #e1f2ef;
+            padding: 20px;
+            margin: auto;
+        }
+
+        #ex2 {
+            background-color: WhiteSmoke;
+            width: 1000px;
+            height: 240px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: auto;
+        }
+
+        .content img {
+            width: 250px;
+            height: auto;
+        }
+
+        .content p {
+            font-size: 16px;
+            width: 600px;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #618780;
+            text-align: center;
+            padding: 20px;
+            margin: auto;
+        }
+
+        .footer .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .footer .contact-info {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .footer img {
+            width: 150px;
+        }
+
+        @media screen and (max-width: 1243px) {
+            body, .navbar, #ex1, .content, .footer {
+                width: 100%; /* Ensures the page is responsive */
+            }
+        }
+	video {
+            width: 400px;
+            height: auto;
+        }
+	#ex3 {
+            background-color: white;
+	    width: 175px;
+	    height: 130px;
+	    margin: 30px;
+        }
+       	.container {
+            max-width: 1000px;
+            margin: 50px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #618780;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 10px;
+            background: #e1f2ef;
+            border-radius: 5px;
+        }
+        .section h2 {
+            color: #618780;
+        }
+        .section p {
+            color: #555;
+        }
+        .week {
+            background: #e1f2ef;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .day {
+            background: #618780;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            color: white;
+        }
+        .buttons {
+            margin: 20px 0;
+        }
+        .buttons button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #618780;
+            color: white;
+        }
+	.btn {
+            padding: 10px 15px;
+            font-size: 18px;
+            background: #618780;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+	    border-radius: 20px;
+        }
+        .btn:hover {
+            background: #4b5e5b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <img src="./image/Black and Grey Square Social Logo.png" alt="Challenge Rise Logo">
+        <div class="nav-links">
+            <button class="button"><a href="home.php">Home</a></button>
+            <button class="button"><a href="aboutus.php">About Us</a></button>
+            <button class="button"><a href="workshop.php">Workshop</a></button>
+	 <button class="button"><a href="contactus.php">Contact Us</a></button>
+            
+            <button class="button"><a href="rg1.php">Registration</a></button>
+            <button class="button" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+           <button class="button"><a href="admin.php">Admin</a></button>
+        </div>
+    </div>
+
+<div id="ex1">
+        <div class="content">
+<table border="0" cellspacing="0">
+<tr>
+		<td><font size="7" color="#618780"><pre>	Challenge<br>	Rise (5 AM )</font><br>            <font size="4" color="#666666">Master Your Mornings. Conquer Your Life.</font><br><br>		</pre></td>
+	<td><pre>			<video controls autoplay muted loop>
+                <source src="./video/homepage-hero-square.mp4" type="video/mp4">
+                Your browser does not support HTML video.
+            </video></pre></td>
+</tr>
+</table>
+	</div>
+</div><center>
+<table border="0" cellspacing="0">
+<tr>
+    <td>
+        <div id="ex3">
+            <center><br><img src="./image/time-1.webp"><br><font size="4" color="#666666">Timings</font><br><font size="5" color="#3a5999">5 to 6 AM (IST)</font></center>
+        </div>
+    </td>
+    <td>
+        <div id="ex3">
+            <center><br><img src="./image/global-1.webp"><br><font size="4" color="#666666">Language</font><br><font size="5" color="#3a5999">English</font></center>
+        </div>
+    </td>
+<td>
+        <div id="ex3">
+            <center><br><img src="./image/duration-1.webp"><br><font size="4" color="#666666">Duration</font><br><font size="5" color="#3a5999">14 Days</font></center>
+        </div>
+    </td>
+</tr>
+</table>
+<div class="container">
+        <h1>What's Included?</h1>
+        <div class="section">
+            <h2>Session Every Morning</h2>
+            <p>Start your day with our invigorating session at 5AM. Each session will include deep knowledge, a prayer to fill you with energy, and engaging activities.</p>
+        </div>
+        <div class="section">
+            <h2>Science of Waking up Early</h2>
+            <p>Unlock the secrets of waking up at 5AM with ease, discover the untold science behind it and learn how to make it a habit for life.</p>
+        </div>
+        <div class="section">
+            <h2>Steps For Legendary Morning Routine</h2>
+            <p>Learn the steps to make the first hour of your day your peak productivity hour - to achieve excellence in whatever you do.</p>
+        </div>
+        <div class="section">
+            <h2>Workout Plan to Stay Fit</h2>
+            <p>Learn how you can remain fit, without the gym or any equipment, through in-session demos and challenges.</p>
+        </div>
+    </div>
+<pre>	<img src="./image/Screenshot (423).png" width="700" height="600"></pre>
+<div class="container">
+    <h1>Curriculum For The 14 Days</h1>
+    <div class="buttons">
+        <button onclick="showWeek(1)">Week 1</button>
+        <button onclick="showWeek(2)">Week 2</button>
+    </div>
+    <div id="curriculum">
+	
+</div>
+</div>
+
+<script>
+    const curriculumData = [
+        { week: "Week 1", days: [
+            "Yoga and meditation challenge",
+            "Wake up 30 minutes early",
+            "Drinking 8 glasses of water",
+            "Plan your day perfectly",
+            "30 minutes workout",
+            "Limit social media fun challenge",
+            "Reading challenge"
+        ] },
+        { week: "Week 2", days: [
+            "Healthy food (pendulum)",
+            "Healthy night rituals",
+            "Panch tatva",
+            "Deep work (no distractions)",
+            "Mindset according to information intake (positive and negative)",
+            "Try a new hobby",
+            "Write a letter to your future self and do a random act of kindness"
+        ] }
+    ];
+
+    function showWeek(weekNumber) {
+        const curriculumContainer = document.getElementById("curriculum");
+        curriculumContainer.innerHTML = ""; // Clear previous content
+
+        const weekData = curriculumData[weekNumber - 1];
+
+        const weekDiv = document.createElement("div");
+        weekDiv.classList.add("week");
+        weekDiv.style.display = "block";
+        weekDiv.innerHTML = `<h2>${weekData.week}</h2>`;
+
+        weekData.days.forEach((activity, dayIndex) => {
+            const dayDiv = document.createElement("div");
+            dayDiv.classList.add("day");
+            dayDiv.innerHTML = `<strong>Day ${dayIndex + 1}:</strong> ${activity}`;
+            weekDiv.appendChild(dayDiv);
+        });
+
+        curriculumContainer.appendChild(weekDiv);
+    }
+</script>
+</center>
+
+    <!-- Footer -->
+    <div class="footer">
+        <img src="./image/Black and Grey Square Social Logo11.png" alt="Challenge Rise Logo">
+        <div class="footer-links">
+            <button class="button"><a href="home.php">Home</a></button>
+            <button class="button"><a href="aboutus.php">About Us</a></button>
+            <button class="button"><a href="workshop.php">Workshop</a></button>
+            <button class="button"><a href="contactus.php">Contact Us</a></button>
+        </div>
+        <div class="contact-info">
+            <p><font color="white"><span style='font-size:25px;'>&#128379;</span> 111-222-333 | <span style='font-size:25px;'>&#128386;</span> challengeRise@gmail.com</font></p>
+            <center><hr style="height:2px; border-width:0; color:white; background-color:white; width:80%;"></center>
+            <button class="button"><a href="tc.php">Terms & Conditions</a></button><font color="white">|</font>
+            <button class="button"><a href="pp.php">Privacy Policy</a></button>
+            <p><font color="white">© 2025 Challenge Rise. All Rights Reserved.</font></p>
+        </div>
+    </div>
+<!-- Modal for Login -->
+    <!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="">
+    <!-- Email input -->
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" name="email" 
+            value="<?php echo htmlspecialchars($email_value); ?>" required>
+    </div>
+
+    <!-- Password input -->
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" required>
+    </div>
+
+    <a href="#" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" style="color:black;">
+        <center>Forgot Password?</center>
+    </a>
+
+    <!-- Login button -->
+    <button type="submit" name="login" class="btn btn-primary">Login</button>
+</form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+   <!-- Bootstrap Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (for modal functionality) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Forgot Password Modal -->
+
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="">
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="text" name="reset_username" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>New Password</label>
+                            <input type="password" name="new_password" class="form-control" required>
+                        </div>
+                        <button type="submit" name="reset_password" class="btn btn-primary w-100">Reset Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+<script>
+    document.getElementById('registrationForm').addEventListener('submit', function(event) {
+        let name = document.getElementById('name').value;
+        let contact = document.getElementById('contact').value;
+        let password = document.getElementById('password').value;
+        let confirmPassword = document.getElementById('confirmPassword').value;
+        let errorMessage = '';
+
+        if (/\d/.test(name)) {
+            errorMessage = '❌ Name cannot contain numbers!';
+        }
+        if (!/^[0-9]+$/.test(contact)) {
+            errorMessage = '❌ Contact number must contain only numbers!';
+        }
+        if (password !== confirmPassword) {
+            errorMessage = '❌ Passwords do not match!';
+        }
+
+        if (errorMessage) {
+            event.preventDefault();
+            alert(errorMessage);
+        } else {
+            alert('✅ Registration Successful! Redirecting to homepage...');
+        }
+    });
+
+    <?php if (!empty($error_message)) : ?>
+        alert("<?php echo $error_message; ?>");
+    <?php endif; ?>
+</script>
+</body>
+</html>
